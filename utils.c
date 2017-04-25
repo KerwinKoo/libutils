@@ -118,13 +118,13 @@ int is_valid_mac_address(const char* mac) {
 // return 0:error, other: all digit
 int
 is_digits(const char *str) {
-	int i = 0;
 	int ret = 1;
 	if (str == NULL) {
 		return 0;
 	}
 
-	for(; i< strlen(str); i++) {
+	unsigned int i = 0;
+	for(; i<strlen(str); i++) {
 		ret = isdigit(str[i]);
 		if(ret){
 			continue;
@@ -141,14 +141,11 @@ is_digits(const char *str) {
 void 
 s_sleep(unsigned int s, unsigned int u){
 	struct timeval timeout;
-	int ret = 0;
 
 	timeout.tv_sec = s;
 	timeout.tv_usec = u;
-	ret = select(0, NULL, NULL, NULL, &timeout);
-
+	select(0, NULL, NULL, NULL, &timeout);
 }
-
 
 // get_timestamp_millisecond get timestamp from time-now
 // it writes resut of unix-time to "sec" and "usec"
@@ -171,27 +168,28 @@ get_timestamp_millisecond(long int *sec, long int *usec) {
 */
 int 
 substring(char *dest, int dest_len, const char *src, int start, int end) {
-	int ret = 1;
 	if (src == NULL || dest == NULL) {
-		return ret;
+		return 1;
 	}
 	
 	if (start < 0 || end < 0 || end - start < 0) {
-		return ret;
+		return 1;
 	}
 
 	if (dest_len < (end - start + 1)) {
-		return ret;
+		return 1;
 	}
 
 	int i = start;
 
-	if( start > strlen(src) )
-		return ret;
+	if( (unsigned int )start > strlen(src) ) {
+		return 1;
+	}
 
-	if( end > strlen(src) )
+	if( (unsigned int )end > strlen(src) ) {
 		end = strlen(src);
-
+	}
+		
 	while( i < end ) {
 		dest[i-start] = src[i];
 		i++;
@@ -209,7 +207,9 @@ IsALNUMornot(const char *string) {
 	if (string == NULL) {
 		return 1;
 	}
-	int ret = 0, i = 0;
+	
+	int ret = 0;
+	unsigned int i = 0;
 	for( i=0;i<strlen(string);i++ )
 		if( !isalnum(string[i]) ){
 			ret = 1;
@@ -325,10 +325,10 @@ get_child_pids(int parent_pid, char *exec_cmd, int *child_pids, int len, char st
 					if (endptr != NULL) {
 						child_pids[count] = pid;
 						count++;
-						memset(pid_str, sizeof(pid_str), 0);
-						memset(pstat, sizeof(pstat), 0);
-						memset(ppid_str, sizeof(ppid_str), 0);
-						memset(init_pid, sizeof(init_pid), 0);
+						memset(pid_str, 0, sizeof(pid_str));
+						memset(pstat, 0, sizeof(pstat));
+						memset(ppid_str, 0, sizeof(ppid_str));
+						memset(init_pid, 0, sizeof(init_pid));
 					}
 				}
 			}
@@ -359,7 +359,6 @@ get_ancestor_pid(char *exec_cmd, int target_pid) {
         return -1;
 	}
 
-	int count = 0;
 	char proc_path[PATH_NAME_LEN] = {0};
 
 	char target_exec_cmd[64] = {0};
@@ -371,9 +370,6 @@ get_ancestor_pid(char *exec_cmd, int target_pid) {
 	char proc_stat_buf[PID_STAT_BUF_LEN] = {0};
 	char others[PID_STAT_BUF_LEN] = {0};
 	char pid_str[8]={0}, cmd_buf[64]={0}, pstat[4]={0}, ppid_str[8]={0}, init_pid[8] = {0};
-	char *endptr;
-	char stat_str[2] = {0};
-	int pid = 0;
 	char *pid_str_p = NULL;
 	int ancestor_pid = -1;
 	int proc_pid = 0;
