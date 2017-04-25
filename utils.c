@@ -477,7 +477,8 @@ void curl_init() {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
-static int dl_progress(void *clientp,double dltotal,double dlnow,double ultotal,double ulnow) {
+static int 
+dl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
     // if (dlnow && dltotal)
     //     printf("dl:%3.0f%%\r",100*dlnow/dltotal); //shenzi prog-mon 
 	// //	printf("dl:%3.0f\r",100*dlnow/dltotal); //shenzi prog-mon 
@@ -632,7 +633,7 @@ int download(char *url,
             //see: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
             switch(http_response){
 				//eg connection down  from kick-off ~suggest retrying till some max limit
-				case 200: //yay we at least got to our url
+				case 200:
 					*state_code = CURL_HTTP_200;
 					break;
 				case 404:
@@ -640,7 +641,7 @@ int download(char *url,
 					break;
 				case 206:
 				case 416: //http://www.checkupdown.com/status/E416.html
-				default: //suggest quitting on an unhandled error
+				default:
 					*state_code = CURL_HTTP_OTHER;
 					break;
             };
@@ -657,7 +658,7 @@ int download(char *url,
 	return ret;
 }
 
-// net_visit
+// net_visit visit a net address with url
 // return : 0=succeed
 // 			1-failed/err with some reason that could not download, reason code 
 //				saved in state_code argument.
@@ -669,19 +670,12 @@ net_visit(char *url,
 			long timeout, 
 			int *state_code,
 			double *down_size) {
-
 	CURL *curl;
 	CURLcode curl_retval;
 	long http_response;
 	double dl_size;
-	int could_be_resume = 0;
-	struct stat st={0};
-	int file_stat = 0;
 	int ret = 1;
 
-	/* dl_lowspeed_time seconds while below low spped limit before aborting 
-	 * dl_lowspeed_bytes is the limitation. 
-	 */
     long dl_lowspeed_bytes = 1000; //1K
 	*state_code = CURL_OK;
     long dl_lowspeed_time = 60; //sec
@@ -700,8 +694,6 @@ net_visit(char *url,
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30);
         curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, dl_lowspeed_bytes); //bytes/sec
-
-		/* seconds while below low spped limit before aborting */
         curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, dl_lowspeed_time); 
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, s);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1); // handle 302 and 301
@@ -710,16 +702,12 @@ net_visit(char *url,
 			char *self_post_buf = post_buf == NULL ? "/0":post_buf;
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, self_post_buf);
 		}
-        /*digitals to descrip info,
-		 *uncomment this to get curl to tell you what its up to*/
 #if CURL_DEBUG
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 #endif
         if(CURLE_OK != (curl_retval = curl_easy_perform(curl))) {
 			switch(curl_retval) {
-				//Transferred a partial file
-				//all defined in curl/curl.h 
-				default: //suggest quitting on unhandled error
+				default: 
 					*state_code = curl_retval;
 			};
 
@@ -728,19 +716,19 @@ net_visit(char *url,
             curl_retval=curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response);
 
             switch(http_response){
-				case 200: //yay we at least got to our url
+				case 200:
 					*state_code = CURL_HTTP_200;
 					break;
 				case 404:
 					ret = 1;
 					break;
 				case 206:
-				case 416: //http://www.checkupdown.com/status/E416.html
-				default: //suggest quitting on an unhandled error
+				case 416:
+				default:
 					*state_code = CURL_HTTP_OTHER;
 					break;
             };
-		} else { //our work here is done ;)
+		} else {
             ret = 0;
         }
 
