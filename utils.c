@@ -460,6 +460,8 @@ get_pure_md5sum(const char *md5_sum, char *pure_md5_buf, int buf_len) {
 	return 0;
 }
 
+/* my curl functions define */
+
 /*
  * NAME curl_init()
  *
@@ -487,7 +489,6 @@ static int dl_progress(void *clientp,double dltotal,double dlnow,double ultotal,
 static size_t dl_write(void *buffer, const size_t size, const size_t nmemb, void *stream) {    
 	return fwrite(buffer, size, nmemb, (FILE*)stream); 
 }
-
 
 static size_t write_to_mycurl_string(void *buffer, 
 									const size_t size, 
