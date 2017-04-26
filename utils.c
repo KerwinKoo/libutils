@@ -473,7 +473,8 @@ get_pure_md5sum(const char *md5_sum, char *pure_md5_buf, int buf_len) {
  *
  * This function is not thread-safe! So I allways dont't use it ---- By KerwinKoo
  */
-void curl_init() {
+void 
+curl_init() {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
@@ -487,11 +488,13 @@ dl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double 
 }
 
 // dl_write callback func, write bytes into File 
-static size_t dl_write(void *buffer, const size_t size, const size_t nmemb, void *stream) {    
+static size_t 
+dl_write(void *buffer, const size_t size, const size_t nmemb, void *stream) {    
 	return fwrite(buffer, size, nmemb, (FILE*)stream); 
 }
 
-static size_t write_to_mycurl_string(void *buffer, 
+static size_t 
+write_to_mycurl_string(void *buffer, 
 									const size_t size, 
 									const size_t nmemb, 
 									struct mycurl_string *s) {
@@ -512,7 +515,13 @@ static size_t write_to_mycurl_string(void *buffer,
 	return size*nmemb;
 }
 
-struct mycurl_string *mycurl_string_init(struct mycurl_string *stream) {
+/* mycurl_string_init:
+*
+*  the value of struct mycurl_string must be init using this func before use it. 
+*  After  mycurl_string_init succeed, stream->ptr will not be NULL
+*/
+struct mycurl_string 
+*mycurl_string_init(struct mycurl_string *stream) {
 	stream->len = 0;
 	stream->ptr = os_malloc(stream->len+1);
 
@@ -524,7 +533,8 @@ struct mycurl_string *mycurl_string_init(struct mycurl_string *stream) {
 	return stream;
 }
 
-void mycurl_string_free(struct mycurl_string *stream) {
+void 
+mycurl_string_free(struct mycurl_string *stream) {
 	if (stream != NULL && stream->ptr != NULL) {
 		free(stream->ptr);
 	}
@@ -534,7 +544,8 @@ void mycurl_string_free(struct mycurl_string *stream) {
 // return : 0=succeed
 // 			1-failed/err with some reason that could not download, reason code 
 //				saved in state_code argument.
-int download(char *url, 
+int 
+download(char *url, 
 			char *target_filename, 
 			int resume_enable,
 			long timeout, 
@@ -663,7 +674,7 @@ int download(char *url,
 // 			1-failed/err with some reason that could not download, reason code 
 //				saved in state_code argument.
 int 
-net_visit(char *url, 
+net_visit(const char *url, 
 			struct mycurl_string *s,
 			int method,
 			char *post_buf,

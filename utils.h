@@ -82,7 +82,7 @@ int download(char *url,
 			int *state_code,
 			double *download_size);
 
-int net_visit(char *url, 
+int net_visit(const char *url, 
 			struct mycurl_string *s,
 			int method,
 			char *post_buf,
